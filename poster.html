@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Stories - Alexandre Costa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            yellow: '#FBBF24', // Amarelo vibrante
+                            dark: '#111111',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-concrete {
+            background-color: #1a1a1a;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        }
+        
+        [contenteditable]:focus {
+            outline: 2px dashed #FBBF24;
+            outline-offset: 4px;
+        }
+
+        #poster-area {
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen flex flex-col items-center justify-center p-4 font-sans gap-6">
+
+    <!-- Controles -->
+    <div class="bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-md text-center border border-gray-700">
+        <h1 class="text-white text-xl font-bold mb-4">Configurar Poster</h1>
+        
+        <div class="flex justify-center gap-4 mb-6">
+            <button onclick="setFormat('story')" class="flex flex-col items-center gap-2 group">
+                <div class="w-8 h-14 border-2 border-brand-yellow rounded bg-brand-yellow/10 group-hover:bg-brand-yellow transition-colors"></div>
+                <span class="text-xs text-gray-300 font-bold">Story (9:16)</span>
+            </button>
+            <button onclick="setFormat('feed')" class="flex flex-col items-center gap-2 group">
+                <div class="w-10 h-12 border-2 border-gray-500 rounded group-hover:border-brand-yellow group-hover:bg-brand-yellow transition-colors"></div>
+                <span class="text-xs text-gray-300 font-bold">Feed (4:5)</span>
+            </button>
+        </div>
+
+        <button onclick="downloadPoster()" class="w-full bg-brand-yellow text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 transition-all shadow-lg flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Baixar Imagem
+        </button>
+        <p id="error-msg" class="text-red-400 text-xs mt-3 hidden bg-red-900/30 p-2 rounded border border-red-800">
+            <strong>Erro de Segurança do Navegador:</strong><br>
+            Não é possível exportar imagens locais diretas.<br>
+            Solução: Use a extensão <em>"Live Server"</em> no VS Code.
+        </p>
+    </div>
+
+    <!-- O POSTER -->
+    <div id="poster-area" class="relative bg-concrete overflow-hidden shadow-2xl border-4 border-gray-800 shrink-0 select-none" style="width: 375px; height: 667px;">
+        
+        <div class="absolute top-0 right-0 w-24 h-24 bg-brand-yellow z-0"></div>
+        <div class="absolute top-24 right-0 w-8 h-24 bg-brand-yellow/20 z-0"></div>
+
+        <div class="relative z-10 h-full flex flex-col justify-between p-8">
+            
+            <!-- Header / Logo -->
+            <div id="poster-header" class="flex items-center gap-3 pt-4 transition-transform duration-300 origin-left">
+                <div class="bg-brand-yellow text-black p-1.5 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.242-1.758A6 6 0 0 0 8.26 4.74L12 8.482a2 2 0 0 1 1 3.414l5 5a2 2 0 0 0 3.5-5.396Z"/></svg>
+                </div>
+                <span class="text-white font-bold tracking-widest text-sm" contenteditable="true">ALEXANDRE.COSTA</span>
+            </div>
+
+            <div class="flex-1 flex flex-col mt-10 relative z-20">
+                <h2 class="text-5xl font-black leading-[0.9] uppercase tracking-tighter drop-shadow-lg">
+                    <span class="text-white block" contenteditable="true">A SUA</span>
+                    <span class="text-brand-yellow block" contenteditable="true">OBRA</span>
+                    <span class="text-white block" contenteditable="true">EM BOAS</span>
+                    <span class="text-brand-yellow block" contenteditable="true">MÃOS.</span>
+                </h2>
+
+                <p class="text-gray-300 text-sm mt-6 font-medium max-w-[200px] leading-relaxed" contenteditable="true">
+                    Sou Alexandre Costa. <br>
+                    Mestre de Obras com rigor de engenharia.
+                </p>
+
+                <!-- Container do Botão CTA (com ID para ocultar no feed) -->
+                <div id="cta-container" class="mt-8 bg-brand-yellow text-black py-4 px-6 rounded-lg font-black uppercase tracking-wide flex items-center gap-3 w-max shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] transform -rotate-1 transition-opacity duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <div class="flex flex-col items-start leading-none gap-1">
+                        <span class="text-[10px] opacity-80">ACESSE O SITE E</span>
+                        <span class="text-sm">SOLICITE UM ORÇAMENTO</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imagem do Alexandre (Sem Aura) -->
+            <img src="images/alex.png" 
+                 id="alex-img"
+                 alt="Alexandre Silva" 
+                 class="absolute bottom-0 right-[-80px] w-[450px] md:w-[550px] object-cover z-10 transition-all duration-300"
+                 style="mask-image: linear-gradient(to bottom, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);">
+        </div>
+    </div>
+
+    <script>
+        // Configurações de Tamanho
+        function setFormat(type) {
+            const poster = document.getElementById('poster-area');
+            const header = document.getElementById('poster-header');
+            const img = document.getElementById('alex-img');
+            const cta = document.getElementById('cta-container');
+
+            if (type === 'story') {
+                poster.style.width = '375px';
+                poster.style.height = '667px';
+                header.style.transform = 'scale(1)';
+                img.style.width = '450px';
+                // Mostrar botão no Story
+                cta.style.display = 'flex';
+            } else if (type === 'feed') {
+                poster.style.width = '400px';
+                poster.style.height = '500px';
+                header.style.transform = 'scale(0.85) translateY(-5px)';
+                img.style.width = '380px';
+                // Esconder botão no Feed
+                cta.style.display = 'none';
+            }
+        }
+
+        function downloadPoster() {
+            const poster = document.getElementById('poster-area');
+            const errorMsg = document.getElementById('error-msg');
+            
+            html2canvas(poster, {
+                scale: 3,
+                useCORS: true, 
+                allowTaint: true, 
+                backgroundColor: null,
+                logging: true
+            }).then(canvas => {
+                try {
+                    const link = document.createElement('a');
+                    link.download = 'story-alexandre.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    errorMsg.classList.add('hidden');
+                } catch (e) {
+                    console.error("Erro na exportação:", e);
+                    // Mostra a mensagem de erro na tela
+                    errorMsg.classList.remove('hidden');
+                }
+            }).catch(err => {
+                console.error("Erro html2canvas:", err);
+                errorMsg.classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
